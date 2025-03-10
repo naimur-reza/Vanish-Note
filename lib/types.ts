@@ -3,7 +3,7 @@ export interface Poll {
   question: string;
   options: {
     id: string;
-    text: string;
+    value: string;
     votes: number;
   }[];
   expiresAt: string;

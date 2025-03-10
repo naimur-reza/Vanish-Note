@@ -20,7 +20,7 @@ const pollSchema = z.object({
     )
     .min(2, { message: "Minimum two options are required" })
     .max(10, { message: "Maximum ten options are allowed" }),
-  expiration: z.enum(["3600", "43200", "86400"]),
+  expiresAt: z.enum(["3600", "43200", "86400"]),
   hideResults: z.boolean().default(false),
 });
 
@@ -40,7 +40,7 @@ export default function CreatePoll() {
     defaultValues: {
       question: "",
       options: [{ value: "" }, { value: "" }],
-      expiration: "3600",
+      expiresAt: "3600",
       hideResults: false,
     },
   });
@@ -185,7 +185,7 @@ export default function CreatePoll() {
                     id="1hour"
                     value="3600"
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                    {...register("expiration")}
+                    {...register("expiresAt")}
                   />
                   <label htmlFor="1hour" className="flex-1 text-sm">
                     1 hour
@@ -197,7 +197,7 @@ export default function CreatePoll() {
                     id="12hours"
                     value="43200"
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                    {...register("expiration")}
+                    {...register("expiresAt")}
                   />
                   <label htmlFor="12hours" className="flex-1 text-sm">
                     12 hours
@@ -209,7 +209,7 @@ export default function CreatePoll() {
                     id="24hours"
                     value="86400"
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                    {...register("expiration")}
+                    {...register("expiresAt")}
                   />
                   <label htmlFor="24hours" className="flex-1 text-sm">
                     24 hours

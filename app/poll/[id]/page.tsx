@@ -1,5 +1,6 @@
 "use client";
 
+import { getPollBySlug } from "@/lib/actions";
 import {
   ArrowLeft,
   Check,
@@ -10,6 +11,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 // Mock data for the poll
@@ -17,10 +19,10 @@ const mockPoll = {
   id: "abc123",
   question: "What's your favorite programming language?",
   options: [
-    { id: "opt1", text: "JavaScript", votes: 42 },
-    { id: "opt2", text: "Python", votes: 35 },
-    { id: "opt3", text: "TypeScript", votes: 28 },
-    { id: "opt4", text: "Java", votes: 15 },
+    { id: "opt1", value: "JavaScript", votes: 42 },
+    { id: "opt2", value: "Python", votes: 35 },
+    { id: "opt3", value: "TypeScript", votes: 28 },
+    { id: "opt4", value: "Java", votes: 15 },
   ],
   expiresAt: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
   hideResults: false,
@@ -31,7 +33,7 @@ const mockPoll = {
   },
 };
 
-export default function PollPage({ params }: { params: { id: string } }) {
+export default function PollPage() {
   const [poll, setPoll] = useState(mockPoll);
   const [hasVoted, setHasVoted] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -40,6 +42,17 @@ export default function PollPage({ params }: { params: { id: string } }) {
   const [isExpired, setIsExpired] = useState(false);
   const [copied, setCopied] = useState(false);
   const [comment, setComment] = useState("");
+
+  const { id } = useParams();
+
+  useEffect(() => {
+    async function fetchPoll() {
+      const res = await getPollBySlug(id as string);
+      console.log(res);
+      setPoll(res.data);
+    }
+    fetchPoll();
+  }, [id]);
 
   // Calculate time left and check if poll is expired
   useEffect(() => {
@@ -76,10 +89,10 @@ export default function PollPage({ params }: { params: { id: string } }) {
   // Check if user has already voted
   useEffect(() => {
     const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "{}");
-    if (votedPolls[params.id]) {
+    if (votedPolls[id]) {
       setHasVoted(true);
     }
-  }, [params.id]);
+  }, [id]);
 
   const handleVote = () => {
     if (!selectedOption || hasVoted || isSubmitting) return;
@@ -103,7 +116,7 @@ export default function PollPage({ params }: { params: { id: string } }) {
 
       // Save vote to localStorage
       const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "{}");
-      votedPolls[params.id] = true;
+      votedPolls[id] = true;
       localStorage.setItem("votedPolls", JSON.stringify(votedPolls));
 
       setHasVoted(true);
@@ -184,7 +197,7 @@ export default function PollPage({ params }: { params: { id: string } }) {
                       <Check className="h-3 w-3" />
                     )}
                   </div>
-                  <span className="font-medium">{option.text}</span>
+                  <span className="font-medium">{option.value}</span>
                 </div>
               </div>
             ))}
