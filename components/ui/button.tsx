@@ -5,7 +5,7 @@ import { ButtonHTMLAttributes, ReactNode } from "react";
 const buttonVariants = {
   default: "bg-primary text-white hover:bg-primary/90",
   outline: "border hover:bg-secondary/60",
-  ghost: "text-gray-700 hover:bg-gray-200",
+  ghost: "text-gray-700 hover:bg-gray-200 dark:hover:bg-gray-900",
   destructive: "bg-red-500 text-white hover:bg-red-600",
 };
 
