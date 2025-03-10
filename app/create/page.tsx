@@ -1,54 +1,77 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import type React from "react";
+import { useFieldArray, useForm } from "react-hook-form";
+import * as z from "zod";
 
 import Button from "@/components/ui/button";
+import { createPoll } from "@/lib/actions";
 import { Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+const pollSchema = z.object({
+  question: z.string().min(1, { message: "Question is required" }),
+  options: z
+    .array(
+      z.object({ value: z.string().min(1, { message: "Option is required" }) }),
+    )
+    .min(2, { message: "Minimum two options are required" })
+    .max(10, { message: "Maximum ten options are allowed" }),
+  expiration: z.enum(["3600", "43200", "86400"]),
+  hideResults: z.boolean().default(false),
+});
+
+type PollSchemaType = z.infer<typeof pollSchema>;
+
 export default function CreatePoll() {
   const router = useRouter();
-  const [question, setQuestion] = useState("");
-  const [options, setOptions] = useState(["", ""]);
-  const [expiration, setExpiration] = useState("3600"); // 1 hour in seconds
-  const [hideResults, setHideResults] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<PollSchemaType>({
+    resolver: zodResolver(pollSchema),
+    defaultValues: {
+      question: "",
+      options: [{ value: "" }, { value: "" }],
+      expiration: "3600",
+      hideResults: false,
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "options",
+  });
+
   const addOption = () => {
-    setOptions([...options, ""]);
+    append({ value: "" });
   };
 
   const removeOption = (index: number) => {
-    if (options.length <= 2) return;
-    const newOptions = [...options];
-    newOptions.splice(index, 1);
-    setOptions(newOptions);
+    remove(index);
   };
 
-  const updateOption = (index: number, value: string) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate form
-    if (!question.trim()) return;
-    if (options.some((option) => !option.trim())) return;
-
+  const onSubmit = async (data: PollSchemaType) => {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call with timeout
-      setTimeout(() => {
-        // Generate a random poll ID
-        const pollId = Math.random().toString(36).substring(2, 15);
-        router.push(`/poll/${pollId}`);
-      }, 1000);
+      console.log(data);
+
+      const res = await createPoll(data);
+      console.log(res);
+
+      setIsSubmitting(false);
+
+      const { slug } = res?.data;
+
+      router.push(`/poll/${slug}`);
     } catch (error) {
       console.error("Failed to create poll:", error);
       setIsSubmitting(false);
@@ -88,7 +111,7 @@ export default function CreatePoll() {
             automatically.
           </p>
         </div>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-6 p-6">
             <div className="space-y-2">
               <label htmlFor="question" className="block text-sm font-medium">
@@ -97,27 +120,30 @@ export default function CreatePoll() {
               <textarea
                 id="question"
                 placeholder="What do you want to ask?"
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
                 className="focus:border-primary focus:ring-primary min-h-[100px] w-full rounded-md border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
+                {...register("question")}
               />
+              {errors.question && (
+                <p className="text-sm text-red-600/70">
+                  {errors.question.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-4">
               <label className="block text-sm font-medium">Options</label>
-              {options.map((option, index) => (
-                <div key={index} className="flex items-center gap-2">
+              {fields.map((option, index) => (
+                <div key={option.id} className="flex items-center gap-2">
                   <input
                     type="text"
                     placeholder={`Option ${index + 1}`}
-                    value={option}
-                    onChange={(e) => updateOption(index, e.target.value)}
                     className="focus:border-primary focus:ring-primary h-10 w-full rounded-md border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
+                    {...register(`options.${index}.value` as const)}
                   />
                   <Button
                     variant="outline"
                     onClick={() => removeOption(index)}
-                    disabled={options.length <= 2}
+                    disabled={fields.length <= 2}
                     className="inline-flex items-center justify-center rounded-md focus:outline-none disabled:opacity-50"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -125,10 +151,23 @@ export default function CreatePoll() {
                   </Button>
                 </div>
               ))}
+              {errors.options && errors.options.message && (
+                <p className="text-sm text-red-600/70">
+                  {errors.options.message}
+                </p>
+              )}
+              {errors.options &&
+                errors.options[0] &&
+                errors.options[0].value &&
+                errors.options[0].value?.message && (
+                  <p className="text-sm text-red-600/70">
+                    {errors.options[0].value?.message}
+                  </p>
+                )}
               <Button
                 variant="outline"
                 onClick={addOption}
-                disabled={options.length >= 10}
+                disabled={fields.length >= 10}
                 className="B inline-flex w-full items-center justify-center px-4 py-2 text-sm font-medium shadow-sm focus:outline-none disabled:opacity-50"
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -143,11 +182,9 @@ export default function CreatePoll() {
                   <input
                     type="radio"
                     id="1hour"
-                    name="expiration"
                     value="3600"
-                    checked={expiration === "3600"}
-                    onChange={(e) => setExpiration(e.target.value)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                    {...register("expiration")}
                   />
                   <label htmlFor="1hour" className="flex-1 text-sm">
                     1 hour
@@ -157,11 +194,9 @@ export default function CreatePoll() {
                   <input
                     type="radio"
                     id="12hours"
-                    name="expiration"
                     value="43200"
-                    checked={expiration === "43200"}
-                    onChange={(e) => setExpiration(e.target.value)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                    {...register("expiration")}
                   />
                   <label htmlFor="12hours" className="flex-1 text-sm">
                     12 hours
@@ -171,11 +206,9 @@ export default function CreatePoll() {
                   <input
                     type="radio"
                     id="24hours"
-                    name="expiration"
                     value="86400"
-                    checked={expiration === "86400"}
-                    onChange={(e) => setExpiration(e.target.value)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                    {...register("expiration")}
                   />
                   <label htmlFor="24hours" className="flex-1 text-sm">
                     24 hours
@@ -189,17 +222,10 @@ export default function CreatePoll() {
                 <input
                   type="checkbox"
                   id="hide-results"
-                  checked={hideResults}
-                  onChange={(e) => setHideResults(e.target.checked)}
                   className="peer sr-only"
+                  {...register("hideResults")}
                 />
-                <span
-                  className={`${
-                    hideResults
-                      ? "bg-primary translate-x-6"
-                      : "translate-x-1 bg-white"
-                  } inline-block h-4 w-4 transform rounded-full transition-transform`}
-                />
+                <span className="peer-checked:bg-primary inline-block h-4 w-4 transform rounded-full bg-white transition-transform peer-checked:translate-x-5" />
                 <label
                   htmlFor="hide-results"
                   className="absolute inset-0 cursor-pointer rounded-full"
