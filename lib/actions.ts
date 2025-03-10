@@ -20,3 +20,23 @@ export const createPoll = async (data: any) => {
 
   return response.json();
 };
+
+export const getPollBySlug = async (slug: string) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_DATABASE_URL}/polls/${slug}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  if (!response.ok) {
+    return {
+      success: false,
+      message: "Failed to create poll",
+    };
+  }
+
+  return response.json();
+};

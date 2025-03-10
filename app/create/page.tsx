@@ -165,6 +165,7 @@ export default function CreatePoll() {
                   </p>
                 )}
               <Button
+                type="button"
                 variant="outline"
                 onClick={addOption}
                 disabled={fields.length >= 10}
