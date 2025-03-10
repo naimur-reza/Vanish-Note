@@ -60,7 +60,7 @@ export default function CreatePoll() {
       <div className="mb-4">
         <Link
           href="/"
-          className="flex items-center text-sm transition-colors hover:text-gray-300 dark:hover:text-gray-800"
+          className="flex items-center text-sm transition-colors hover:text-gray-800 dark:hover:text-gray-300"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
