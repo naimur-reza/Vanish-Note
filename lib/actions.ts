@@ -34,7 +34,30 @@ export const getPollBySlug = async (slug: string) => {
   if (!response.ok) {
     return {
       success: false,
-      message: "Failed to create poll",
+      message: "Failed to retreive poll",
+    };
+  }
+
+  return response.json();
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const udpatePoll = async (id: string, data: any) => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_DATABASE_URL}/polls/${id}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    },
+  );
+
+  if (!response.ok) {
+    return {
+      success: false,
+      message: "Failed to update poll",
     };
   }
 

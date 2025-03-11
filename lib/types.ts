@@ -1,6 +1,7 @@
 export interface Poll {
   _id: string;
   question: string;
+  slug: string;
   options: {
     id: string;
     value: string;

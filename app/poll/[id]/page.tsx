@@ -1,6 +1,6 @@
 "use client";
 
-import { getPollBySlug } from "@/lib/actions";
+import { getPollBySlug, udpatePoll } from "@/lib/actions";
 import {
   ArrowLeft,
   Check,
@@ -16,7 +16,8 @@ import { useEffect, useState } from "react";
 
 // Mock data for the poll
 const mockPoll = {
-  id: "abc123",
+  _id: "abc123",
+  slug: "abc123-test",
   question: "What's your favorite programming language?",
   options: [
     { id: "opt1", value: "JavaScript", votes: 42 },
@@ -124,17 +125,18 @@ export default function PollPage() {
     }, 500);
   };
 
-  const handleReaction = (type: "likes" | "trending") => {
-    // Simulate API call
-    setTimeout(() => {
-      setPoll({
-        ...poll,
-        reactions: {
-          ...poll.reactions,
-          [type]: poll.reactions[type] + 1,
-        },
-      });
-    }, 300);
+  const handleReaction = async (type: "likes" | "trending") => {
+    setPoll({
+      ...poll,
+      reactions: {
+        ...poll.reactions,
+        [type]: poll.reactions[type] + 1,
+      },
+    });
+
+    const response = await udpatePoll(poll._id, poll);
+
+    console.log(response);
   };
 
   const handleCopyLink = () => {
@@ -219,13 +221,13 @@ export default function PollPage() {
           <h2 className="mb-6 text-xl font-semibold">Results</h2>
 
           <div className="space-y-5">
-            {poll.options.map((option) => {
+            {poll?.options?.map((option) => {
               const percentage = calculatePercentage(option.votes);
 
               return (
                 <div key={option.id} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{option.text}</span>
+                    <span className="font-medium">{option.value}</span>
                     <span className="text-sm font-medium">{percentage}%</span>
                   </div>
                   <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
