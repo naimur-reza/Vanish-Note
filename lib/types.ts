@@ -9,8 +9,10 @@ export interface Poll {
   }[];
   expiresAt: string;
   hideResults: boolean;
-  reactions?: {
+  reactions: {
     likes: number;
     trending: number;
   };
+  totalVotes: number;
+  createdAt: string;
 }
