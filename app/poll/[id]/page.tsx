@@ -27,6 +27,7 @@ const mockPoll = {
   ],
   expiresAt: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
   hideResults: false,
+  createdAt: new Date(),
   totalVotes: 120,
   reactions: {
     likes: 24,
@@ -59,8 +60,14 @@ export default function PollPage() {
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date();
-      const expiry = new Date(poll.expiresAt);
-      const diffMs = expiry.getTime() - now.getTime();
+
+      // Assuming poll.createdAt is when the poll was created (ISO timestamp)
+      const createdAt = new Date(poll.createdAt);
+      const expiryTime = new Date(
+        createdAt.getTime() + Number(poll.expiresAt) * 1000,
+      ); // Convert seconds to ms
+
+      const diffMs = expiryTime.getTime() - now.getTime();
 
       if (diffMs <= 0) {
         setIsExpired(true);
@@ -68,14 +75,18 @@ export default function PollPage() {
         return;
       }
 
-      const diffSecs = Math.floor(diffMs / 1000);
-      const diffMins = Math.floor(diffSecs / 60);
-      const diffHours = Math.floor(diffMins / 60);
+      const diffSecs = Math.floor(diffMs / 1000) % 60;
+      const diffMins = Math.floor(diffMs / (1000 * 60)) % 60;
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 
       if (diffHours > 0) {
-        setTimeLeft(`${diffHours} hour${diffHours > 1 ? "s" : ""}`);
+        setTimeLeft(
+          `${diffHours} hour${diffHours > 1 ? "s" : ""} ${diffMins} minute${diffMins > 1 ? "s" : ""}`,
+        );
       } else if (diffMins > 0) {
-        setTimeLeft(`${diffMins} minute${diffMins > 1 ? "s" : ""}`);
+        setTimeLeft(
+          `${diffMins} minute${diffMins > 1 ? "s" : ""} ${diffSecs} second${diffSecs > 1 ? "s" : ""}`,
+        );
       } else {
         setTimeLeft(`${diffSecs} second${diffSecs > 1 ? "s" : ""}`);
       }
@@ -85,7 +96,7 @@ export default function PollPage() {
     const timer = setInterval(calculateTimeLeft, 1000);
 
     return () => clearInterval(timer);
-  }, [poll.expiresAt]);
+  }, [poll.expiresAt, poll.createdAt]);
 
   // Check if user has already voted
   useEffect(() => {
