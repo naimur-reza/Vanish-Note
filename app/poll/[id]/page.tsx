@@ -6,12 +6,10 @@ import { ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function PollPage(props: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await props.params;
+const PollPage = async (props: { params: Promise<{ id: string }> }) => {
+  const { id } = await props.params;
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_DATABASE_URL}/polls/${slug}`,
+    `${process.env.NEXT_PUBLIC_DATABASE_URL}/polls/${id}`,
     { next: { tags: ["poll"] }, cache: "no-cache" },
   );
   const data = await res.json();
@@ -76,4 +74,6 @@ export default async function PollPage(props: {
       <CommentsSection poll={poll} />
     </div>
   );
-}
+};
+
+export default PollPage;
