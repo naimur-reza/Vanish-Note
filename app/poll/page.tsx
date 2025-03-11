@@ -10,7 +10,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 // Mock data for the poll
 const mockPoll = {
@@ -31,7 +31,8 @@ const mockPoll = {
   },
 };
 
-export default function PollPage({ params }: { params: { id: string } }) {
+export default function PollPage(props: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(props.params);
   const [poll, setPoll] = useState(mockPoll);
   const [hasVoted, setHasVoted] = useState(false);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -76,10 +77,10 @@ export default function PollPage({ params }: { params: { id: string } }) {
   // Check if user has already voted
   useEffect(() => {
     const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "{}");
-    if (votedPolls[params.id]) {
+    if (votedPolls[slug]) {
       setHasVoted(true);
     }
-  }, [params.id]);
+  }, [slug]);
 
   const handleVote = () => {
     if (!selectedOption || hasVoted || isSubmitting) return;
@@ -103,7 +104,7 @@ export default function PollPage({ params }: { params: { id: string } }) {
 
       // Save vote to localStorage
       const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "{}");
-      votedPolls[params.id] = true;
+      votedPolls[slug] = true;
       localStorage.setItem("votedPolls", JSON.stringify(votedPolls));
 
       setHasVoted(true);

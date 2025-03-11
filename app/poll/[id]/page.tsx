@@ -6,10 +6,12 @@ import { ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function PollPage({ params }: { params: { id: string } }) {
-  const { id } = await params;
+export default async function PollPage(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await props.params;
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_DATABASE_URL}/polls/${id}`,
+    `${process.env.NEXT_PUBLIC_DATABASE_URL}/polls/${slug}`,
     { next: { tags: ["poll"] }, cache: "no-cache" },
   );
   const data = await res.json();
