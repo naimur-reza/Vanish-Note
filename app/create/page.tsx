@@ -226,7 +226,7 @@ export default function CreatePoll() {
                   className="peer sr-only"
                   {...register("hideResults")}
                 />
-                <span className="peer-checked:bg-primary inline-block h-4 w-4 transform rounded-full bg-white transition-transform peer-checked:translate-x-5" />
+                <span className="peer-checked:bg-primary inline-block h-4 w-4 translate-x-1 transform rounded-full bg-white transition-transform peer-checked:translate-x-6" />
                 <label
                   htmlFor="hide-results"
                   className="absolute inset-0 cursor-pointer rounded-full"
