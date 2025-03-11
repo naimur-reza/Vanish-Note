@@ -34,7 +34,7 @@ export const getPollBySlug = async (slug: string) => {
   if (!response.ok) {
     return {
       success: false,
-      message: "Failed to retreive poll",
+      message: "Failed to create poll",
     };
   }
 
@@ -42,9 +42,9 @@ export const getPollBySlug = async (slug: string) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const udpatePoll = async (id: string, data: any) => {
+export const udpatePoll = async (slug: string, data: any) => {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_DATABASE_URL}/polls/${id}`,
+    `${process.env.NEXT_PUBLIC_DATABASE_URL}/polls/${slug}`,
     {
       method: "PATCH",
       headers: {

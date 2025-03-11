@@ -2,20 +2,23 @@ import CommentsSection from "@/components/comment-section";
 import ResultsSection from "@/components/result-section";
 import ShareSection from "@/components/share-section";
 import VotingSection from "@/components/voting-section";
-import { getPollBySlug } from "@/lib/actions";
 import { ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export default async function PollPage({ params }: { params: { id: string } }) {
   const { id } = await params;
-  const res = await getPollBySlug(id);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_DATABASE_URL}/polls/${id}`,
+    { next: { tags: ["poll"] }, cache: "no-cache" },
+  );
+  const data = await res.json();
 
-  if (!res.data) {
+  if (!data.data) {
     return notFound();
   }
 
-  const poll = res.data;
+  const poll = data?.data;
 
   // Calculate if poll is expired
   const now = new Date();

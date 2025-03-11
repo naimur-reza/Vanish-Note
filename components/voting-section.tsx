@@ -1,6 +1,7 @@
 "use client";
 
 import { udpatePoll } from "@/lib/actions";
+import { refetchData } from "@/lib/refetch";
 import type { Poll } from "@/lib/types";
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -45,6 +46,7 @@ export default function VotingSection({ poll, isExpired }: VotingSectionProps) {
 
     // Update in database
     await udpatePoll(poll._id, updatedPoll);
+    refetchData();
 
     // Save vote to localStorage
     const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "{}");
