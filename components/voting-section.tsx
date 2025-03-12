@@ -4,6 +4,7 @@ import { udpatePoll } from "@/lib/actions";
 import { refetchData } from "@/lib/refetch";
 import type { Poll } from "@/lib/types";
 import { Check } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface VotingSectionProps {
@@ -16,6 +17,8 @@ export default function VotingSection({ poll, isExpired }: VotingSectionProps) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pollData, setPollData] = useState(poll);
+
+  const router = useRouter();
 
   // Check if user has already voted
   useEffect(() => {
@@ -46,7 +49,8 @@ export default function VotingSection({ poll, isExpired }: VotingSectionProps) {
 
     // Update in database
     await udpatePoll(poll._id, updatedPoll);
-    refetchData();
+    await refetchData();
+    router.refresh();
 
     // Save vote to localStorage
     const votedPolls = JSON.parse(localStorage.getItem("votedPolls") || "{}");

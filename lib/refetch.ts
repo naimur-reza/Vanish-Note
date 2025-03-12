@@ -1,6 +1,7 @@
-// "use server";
-// import { revalidateTag } from "next/cache";
+"use server";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function refetchData() {
-  //   revalidateTag("poll");
+  revalidateTag("poll");
+  revalidatePath("/");
 }
